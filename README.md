@@ -129,8 +129,6 @@ EOF
 | [go.dev](https://go.dev/)（Tour of Go、Effective Go、Go Spec、Go Blog、pkg.go.dev） | BSD-3-Clause |
 | [Go by Example](https://gobyexample.com/)（Mark McGranaghan） | CC BY 3.0 |
 
-| [Go by Example](https://gobyexample.com/)（Mark McGranaghan） | CC BY 3.0 |
-
 引用片段時皆以自有語句改寫；範例皆原創或顯著變形。
 
 ### 主題與樣式
