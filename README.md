@@ -15,7 +15,7 @@
 - **高強度 Docker 沙箱**：每次執行都在新容器內，無網路、唯讀掛載、記憶體 / CPU / PID 限制、drop all caps、no-new-privileges。
 - **資料驅動架構**：教材是檔案系統上的 Markdown 與 Go 原始碼，後端啟動時掃描 `courses/` 並透過 REST API 提供給前端。新增章節只需建立資料夾。
 
-## 技術棧
+## 技術堆疊
 
 | 層 | 技術 |
 |---|---|
