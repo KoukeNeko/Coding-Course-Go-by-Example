@@ -614,3 +614,498 @@ details.solution-block .content {
 .btn-primary:hover {
   background-color: #0bd1c3;
 }
+
+/* ---------------------------------
+   Dashboard (Lobby Redesign)
+--------------------------------- */
+.dashboard-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  background-color: #0b0f14; /* Deep dark background from design */
+  color: #e5e7eb;
+}
+
+.dashboard-content {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 48px 5vw;
+  width: 100%;
+}
+
+/* Hero Section */
+.hero-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  align-items: center;
+  margin-bottom: 48px;
+}
+
+.hero-left {
+  flex: 1;
+}
+
+.hero-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #6b7280;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+
+.hero-tag .dot {
+  width: 8px;
+  height: 8px;
+  background-color: var(--accent-cyan);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--accent-cyan);
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 16px 0;
+  line-height: 1.1;
+  letter-spacing: -1px;
+}
+
+.hero-desc {
+  font-size: 1rem;
+  color: #9ca3af;
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.btn-primary-cyan {
+  background-color: var(--accent-cyan);
+  color: #000;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary-cyan:hover {
+  background-color: #0bd1c3;
+  box-shadow: 0 0 12px rgba(0, 230, 204, 0.4);
+}
+
+.estimated-time {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+/* Up Next Card */
+.hero-right {
+  flex: 1 1 400px;
+  max-width: 600px;
+}
+
+.up-next-card {
+  background-color: #121820;
+  border: 1px solid #1f2937;
+  border-radius: 12px;
+  padding: 24px;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.up-next-card:hover {
+  border-color: #374151;
+  transform: translateY(-2px);
+}
+
+.card-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.up-next-label {
+  color: var(--accent-cyan);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.chapter-index-label {
+  color: #374151;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.card-main-title {
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.card-subtitle {
+  color: #6b7280;
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+
+.card-small-desc {
+  color: #9ca3af;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.card-bottom-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.progress-track {
+  flex: 1;
+  height: 4px;
+  background-color: #1f2937;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: var(--accent-cyan);
+}
+
+.btn-circle-arrow {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: rgba(0, 230, 204, 0.1);
+  border: 1px solid rgba(0, 230, 204, 0.2);
+  color: var(--accent-cyan);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.up-next-card:hover .btn-circle-arrow {
+  background-color: var(--accent-cyan);
+  color: #000;
+}
+
+/* Stats Section */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 48px;
+}
+
+.stat-card {
+  background-color: #121820;
+  border: 1px solid #1f2937;
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+
+.stat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #9ca3af;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.progress-ring {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #1f2937;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.stat-sub {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+/* Sections Common */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.section-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-title-wrap h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.section-count {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+/* Achievements Section */
+.achievements-flex {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 16px;
+}
+
+.achievement-card {
+  background-color: #121820;
+  border: 1px solid #1f2937;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 200px;
+  opacity: 0.5;
+}
+
+.achievement-card.unlocked {
+  opacity: 1;
+}
+
+.achievement-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background-color: #1f2937;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+}
+
+.ach-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+.ach-sub {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+/* Lessons Grid */
+.lessons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.lesson-box {
+  background-color: #121820;
+  border: 1px solid #1f2937;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.lesson-box:hover {
+  border-color: #374151;
+}
+
+.lesson-box.up-next {
+  border-color: rgba(0, 230, 204, 0.4);
+}
+
+.lesson-box.up-next:hover {
+  border-color: var(--accent-cyan);
+}
+
+.lesson-box-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.lesson-num {
+  background-color: #1f2937;
+  color: #9ca3af;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.lesson-box.up-next .lesson-num {
+  background-color: rgba(0, 230, 204, 0.1);
+  color: var(--accent-cyan);
+}
+
+.badge-upnext {
+  background-color: rgba(0, 230, 204, 0.1);
+  color: var(--accent-cyan);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+.badge-notstarted {
+  background-color: #1f2937;
+  color: #6b7280;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+.badge-completed {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+.lesson-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+}
+
+.lesson-subtitle {
+  font-size: 0.7rem;
+  color: #6b7280;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+.lesson-desc {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  line-height: 1.5;
+  margin: 0 0 24px 0;
+  flex: 1;
+}
+
+.lesson-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lesson-time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #6b7280;
+  font-size: 0.75rem;
+}
+
+.lesson-action {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #9ca3af;
+}
+
+.lesson-box.up-next .lesson-action {
+  color: var(--accent-cyan);
+}
+
+.lesson-box:hover .lesson-action {
+  color: #ffffff;
+}
+
+.lesson-box.up-next:hover .lesson-action {
+  color: #0bd1c3;
+}
+
+/* Footer Section */
+.dashboard-footer {
+  margin-top: 80px;
+  padding-top: 32px;
+  border-top: 1px solid #1f2937;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.footer-brand {
+  color: var(--accent-cyan);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.footer-copyright {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.footer-right {
+  display: flex;
+  gap: 24px;
+}
+
+.footer-link {
+  color: #9ca3af;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: color 0.2s;
+}
+
+.footer-link:hover {
+  color: #ffffff;
+}
