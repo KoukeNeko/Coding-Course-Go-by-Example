@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Play, GraduationCap, LayoutDashboard, Settings, TerminalSquare, BookOpen, ChevronRight } from 'lucide-react';
 import { Sidebar } from './components/Sidebar';
 import { CodeEditor } from './components/CodeEditor';
@@ -13,6 +13,7 @@ function App() {
   const [output, setOutput] = useState('');
   const [isExecuting, setIsExecuting] = useState(false);
   const [error, setError] = useState<string | undefined>();
+  const [terminalHeight, setTerminalHeight] = useState<number>(250);
   const [isLoading, setIsLoading] = useState(true);
   const [completedChapters, setCompletedChapters] = useState<string[]>(() => {
     const saved = localStorage.getItem('completedChapters');
@@ -54,6 +55,27 @@ function App() {
       setError(undefined);
     }
   }, [currentChapterId, currentChapter]);
+
+  const startResizing = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const newHeight = window.innerHeight - moveEvent.clientY;
+      // Clamp the height between 100px and window height - 200px
+      setTerminalHeight(Math.max(100, Math.min(newHeight, window.innerHeight - 200)));
+    };
+    
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    
+    document.body.style.cursor = 'row-resize';
+    document.body.style.userSelect = 'none';
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }, []);
 
   const goToNextChapter = () => {
     if (currentChapterIndex < chapters.length - 1) {
@@ -194,19 +216,18 @@ function App() {
             <div className="lesson-content">
               <ChapterContent chapter={currentChapter} />
             </div>
-            <div className="lesson-footer" style={{ borderTop: 'none', padding: '0 48px 32px 48px', background: 'transparent' }}>
+            <div className="floating-nav-container">
               <button 
-                className="btn-nav" 
+                className="btn-floating" 
                 onClick={goToPrevChapter} 
                 disabled={currentChapterIndex === 0}
               >
                 Previous
               </button>
               <button 
-                className="btn-nav" 
+                className="btn-floating" 
                 onClick={goToNextChapter} 
                 disabled={currentChapterIndex === chapters.length - 1}
-                style={{ color: 'var(--accent-cyan)', borderColor: 'var(--accent-cyan)' }}
               >
                 Next lesson <ChevronRight size={16} />
               </button>
@@ -224,7 +245,9 @@ function App() {
               <CodeEditor code={code} onChange={(v) => setCode(v || '')} />
             </div>
 
-            <div className="terminal-container">
+            <div className="resizer-horizontal" onMouseDown={startResizing} />
+
+            <div className="terminal-container" style={{ height: `${terminalHeight}px` }}>
               <header className="panel-tab" style={{ justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <TerminalSquare size={16} color="var(--accent-cyan)" />

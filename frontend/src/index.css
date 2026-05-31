@@ -155,6 +155,7 @@ body {
   flex-direction: column;
   background-color: var(--bg-primary);
   border-right: 1px solid var(--border-color);
+  position: relative;
 }
 
 /* Editor & Terminal Panel */
@@ -163,6 +164,8 @@ body {
   display: flex;
   flex-direction: column;
   background-color: #0b0e14; /* Deep dark for editor */
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* Panel Header Tabs */
@@ -198,13 +201,28 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .terminal-container {
-  height: 250px;
   border-top: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
+}
+
+.resizer-horizontal {
+  height: 6px;
+  background-color: var(--border-color);
+  cursor: row-resize;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.resizer-horizontal:hover, .resizer-horizontal:active {
+  background-color: var(--accent-cyan);
 }
 
 .terminal-content {
@@ -237,6 +255,45 @@ body {
 }
 .btn-nav:disabled {
   opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.floating-nav-container {
+  position: absolute;
+  bottom: 24px;
+  right: 32px;
+  display: flex;
+  gap: 16px;
+  z-index: 100;
+  pointer-events: none; /* Let clicks pass through empty space */
+}
+
+.btn-floating {
+  pointer-events: auto; /* Enable clicks on the button itself */
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15); /* Subtle outline */
+  border-radius: 24px; /* Pill shape */
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(8px); /* Glassmorphism blur without solid background */
+}
+
+.btn-floating:hover:not(:disabled) {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+  transform: translateY(-2px); /* Slight lift */
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2); /* Cyan glow */
+}
+
+.btn-floating:disabled {
+  opacity: 0.3;
   cursor: not-allowed;
 }
 
