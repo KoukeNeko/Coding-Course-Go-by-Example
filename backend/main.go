@@ -176,6 +176,13 @@ func prepareTempDirectory(code, chapterID string) (string, bool, error) {
 		log.Printf("Failed to copy test file: %v", err)
 	}
 
+	// Create a dummy go.mod to prevent "go.mod file not found" errors in newer Go versions
+	goModContent := "module app\n\ngo 1.21\n"
+	goModPath := filepath.Join(tempDirectoryPath, "go.mod")
+	if err := os.WriteFile(goModPath, []byte(goModContent), 0644); err != nil {
+		log.Printf("Failed to create go.mod: %v", err)
+	}
+
 	// To mount into Docker, macOS requires the path to be absolute and fully resolved (no symlinks).
 	absolutePath, err := filepath.EvalSymlinks(tempDirectoryPath)
 	if err != nil {
