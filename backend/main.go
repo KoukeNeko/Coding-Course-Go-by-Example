@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -27,12 +28,14 @@ const (
 
 // ExecuteRequest represents the incoming JSON payload.
 type ExecuteRequest struct {
-	Code string `json:"code"`
+	Code      string `json:"code"`
+	ChapterID string `json:"chapterId"`
 }
 
 // ExecuteResponse represents the outgoing JSON payload.
 type ExecuteResponse struct {
-	Output string `json:"output"`
+	Output  string `json:"output"`
+	Success bool   `json:"success"`
 }
 
 func main() {
@@ -72,7 +75,7 @@ func handleExecute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tempDirectoryPath, err := prepareTempDirectory(requestPayload.Code)
+	tempDirectoryPath, hasTest, err := prepareTempDirectory(requestPayload.Code, requestPayload.ChapterID)
 	if err != nil {
 		log.Printf("Error creating temp directory: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -81,7 +84,7 @@ func handleExecute(w http.ResponseWriter, r *http.Request) {
 	// Always ensure cleanup runs after execution finishes
 	defer cleanUpTempDirectory(tempDirectoryPath)
 
-	executionOutput, executionError, isTimeout := executeCodeInSandbox(tempDirectoryPath)
+	executionOutput, executionError, isTimeout := executeCodeInSandbox(tempDirectoryPath, hasTest)
 	if isTimeout {
 		http.Error(w, "Execution timeout", http.StatusRequestTimeout)
 		return
@@ -89,11 +92,13 @@ func handleExecute(w http.ResponseWriter, r *http.Request) {
 
 	// executionError usually happens when user code has compilation errors or runtime panics.
 	// We want to return the output (which contains the error message) rather than failing the HTTP request.
+	success := true
 	if executionError != nil {
+		success = false
 		executionOutput += fmt.Sprintf("\n(Error: %v)", executionError)
 	}
 
-	sendExecuteResponse(w, executionOutput)
+	sendExecuteResponse(w, executionOutput, success)
 }
 
 // parseExecuteRequest reads the request body and decodes the JSON payload.
@@ -107,8 +112,8 @@ func parseExecuteRequest(body io.Reader) (ExecuteRequest, error) {
 }
 
 // sendExecuteResponse encodes the output as JSON and sends it to the client.
-func sendExecuteResponse(w http.ResponseWriter, output string) {
-	response := ExecuteResponse{Output: output}
+func sendExecuteResponse(w http.ResponseWriter, output string, success bool) {
+	response := ExecuteResponse{Output: output, Success: success}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(response); err != nil {
@@ -116,27 +121,69 @@ func sendExecuteResponse(w http.ResponseWriter, output string) {
 	}
 }
 
+func copyTestFile(chapterID, tempDirectoryPath string) (bool, error) {
+	if chapterID == "" {
+		return false, nil
+	}
+	coursesDir := "./courses"
+	entries, err := os.ReadDir(coursesDir)
+	if err != nil {
+		return false, err
+	}
+	var folderName string
+	for _, entry := range entries {
+		if entry.IsDir() && strings.HasSuffix(entry.Name(), "-"+chapterID) {
+			folderName = entry.Name()
+			break
+		}
+	}
+	if folderName == "" {
+		return false, nil
+	}
+
+	testSrc := filepath.Join(coursesDir, folderName, "main_test.go")
+	testDest := filepath.Join(tempDirectoryPath, "main_test.go")
+
+	data, err := os.ReadFile(testSrc)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	if err := os.WriteFile(testDest, data, 0644); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 // prepareTempDirectory creates a temporary directory and writes the Go source code into it.
-func prepareTempDirectory(code string) (string, error) {
+func prepareTempDirectory(code, chapterID string) (string, bool, error) {
 	tempDirectoryPath, err := os.MkdirTemp("", tempDirPattern)
 	if err != nil {
-		return "", fmt.Errorf("failed to create temp directory: %w", err)
+		return "", false, fmt.Errorf("failed to create temp directory: %w", err)
 	}
 
 	sourceFilePath := filepath.Join(tempDirectoryPath, "main.go")
 	if err := os.WriteFile(sourceFilePath, []byte(code), 0644); err != nil {
 		cleanUpTempDirectory(tempDirectoryPath)
-		return "", fmt.Errorf("failed to write source file: %w", err)
+		return "", false, fmt.Errorf("failed to write source file: %w", err)
+	}
+
+	hasTest, err := copyTestFile(chapterID, tempDirectoryPath)
+	if err != nil {
+		log.Printf("Failed to copy test file: %v", err)
 	}
 
 	// To mount into Docker, macOS requires the path to be absolute and fully resolved (no symlinks).
 	absolutePath, err := filepath.EvalSymlinks(tempDirectoryPath)
 	if err != nil {
 		cleanUpTempDirectory(tempDirectoryPath)
-		return "", fmt.Errorf("failed to resolve absolute path: %w", err)
+		return "", false, fmt.Errorf("failed to resolve absolute path: %w", err)
 	}
 
-	return absolutePath, nil
+	return absolutePath, hasTest, nil
 }
 
 // cleanUpTempDirectory removes the temporary directory and all its contents.
@@ -147,13 +194,18 @@ func cleanUpTempDirectory(path string) {
 }
 
 // executeCodeInSandbox runs the Go code within a highly restricted Docker container.
-func executeCodeInSandbox(directoryPath string) (output string, err error, isTimeout bool) {
+func executeCodeInSandbox(directoryPath string, hasTest bool) (output string, err error, isTimeout bool) {
 	// Create a context with a strict timeout to prevent infinite loops (RCE mitigation).
 	ctx, cancel := context.WithTimeout(context.Background(), executionTimeoutSeconds*time.Second)
 	defer cancel()
 
 	randomID := fmt.Sprintf("%d", time.Now().UnixNano())
 	containerName := fmt.Sprintf("go-exec-%s", randomID)
+
+	goCmd := []string{"go", "run", "main.go"}
+	if hasTest {
+		goCmd = []string{"go", "test", "-v"}
+	}
 
 	// Construct the secure Docker run command.
 	// WHY: We use extremely strict limits to prevent DoS, fork bombs, and container breakouts.
@@ -177,8 +229,8 @@ func executeCodeInSandbox(directoryPath string) (output string, err error, isTim
 		"-v", fmt.Sprintf("%s:/app:ro", directoryPath), // Mount code directory as read-only
 		"-w", "/app",                        // Set working directory
 		dockerImage,
-		"go", "run", "main.go",
 	}
+	dockerArgs = append(dockerArgs, goCmd...)
 
 	defer func() {
 		// Clean up container just in case it's left running (e.g., timeout)
@@ -243,7 +295,7 @@ func handleGetChapters(w http.ResponseWriter, r *http.Request) {
 		}
 
 		chapterPath := filepath.Join(coursesDir, entry.Name())
-		
+
 		// Read meta.json
 		metaData, err := os.ReadFile(filepath.Join(chapterPath, "meta.json"))
 		if err != nil {

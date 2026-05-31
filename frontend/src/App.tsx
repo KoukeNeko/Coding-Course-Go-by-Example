@@ -22,7 +22,7 @@ function App() {
   useEffect(() => {
     const fetchChapters = async () => {
       try {
-        const response = await fetch('http://localhost:8080/api/chapters');
+        const response = await fetch('/api/chapters');
         if (!response.ok) throw new Error('Failed to fetch chapters');
         const data: Chapter[] = await response.json();
         // Sort chapters by folder name (assuming they start with numbers) -> wait, backend reads them via ReadDir which is alphabetically sorted!
@@ -81,10 +81,10 @@ function App() {
     setError(undefined);
 
     try {
-      const response = await fetch('http://localhost:8080/api/execute', {
+      const response = await fetch('/api/execute', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code })
+        body: JSON.stringify({ code, chapterId: currentChapterId })
       });
 
       if (!response.ok) {
@@ -99,8 +99,15 @@ function App() {
       setOutput(data.output);
       
       // If it compiled and ran successfully, mark as completed
-      if (!completedChapters.includes(currentChapterId)) {
-        setCompletedChapters([...completedChapters, currentChapterId]);
+      if (data.success) {
+        if (!completedChapters.includes(currentChapterId)) {
+          setCompletedChapters([...completedChapters, currentChapterId]);
+        }
+      } else {
+        // We set a custom error message to show in the UI, or just let output handle it.
+        // Actually, the error message is already in `data.output` from go test.
+        // So we can just set an error state to indicate it failed if we want, or leave it.
+        setError('Verification failed. Check the output tab for details.');
       }
     } catch (err: any) {
       setError(err.message || 'An unknown error occurred');
