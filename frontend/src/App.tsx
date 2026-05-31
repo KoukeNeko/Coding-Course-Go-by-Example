@@ -4,6 +4,9 @@ import { Sidebar } from './components/Sidebar';
 import { CodeEditor } from './components/CodeEditor';
 import { Terminal } from './components/Terminal';
 import { ChapterContent } from './components/ChapterContent';
+import { getCookie } from './utils/cookies';
+import { themes } from './utils/editorThemes';
+import { SettingsModal } from './components/SettingsModal';
 import type { Chapter } from './data/chapters';
 
 function App() {
@@ -15,18 +18,25 @@ function App() {
   const [error, setError] = useState<string | undefined>();
   const [terminalHeight, setTerminalHeight] = useState<number>(250);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [editorTheme, setEditorTheme] = useState('github-dark');
+  const [editorFontSize, setEditorFontSize] = useState(16);
   const [completedChapters, setCompletedChapters] = useState<string[]>(() => {
     const saved = localStorage.getItem('completedChapters');
     return saved ? JSON.parse(saved) : [];
   });
 
   useEffect(() => {
+    const savedTheme = getCookie('editor-theme');
+    const savedFontSize = getCookie('editor-font-size');
+    if (savedTheme) setEditorTheme(savedTheme);
+    if (savedFontSize) setEditorFontSize(parseInt(savedFontSize, 10));
+
     const fetchChapters = async () => {
       try {
         const response = await fetch('/api/chapters');
         if (!response.ok) throw new Error('Failed to fetch chapters');
         const data: Chapter[] = await response.json();
-        // Sort chapters by folder name (assuming they start with numbers) -> wait, backend reads them via ReadDir which is alphabetically sorted!
         setChapters(data);
         if (data.length > 0) {
           setCurrentChapterId(data[0].id);
@@ -60,7 +70,6 @@ function App() {
     e.preventDefault();
     const handleMouseMove = (moveEvent: MouseEvent) => {
       const newHeight = window.innerHeight - moveEvent.clientY;
-      // Clamp the height between 100px and window height - 200px
       setTerminalHeight(Math.max(100, Math.min(newHeight, window.innerHeight - 200)));
     };
     
@@ -76,6 +85,12 @@ function App() {
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   }, []);
+
+  const handleEditorBeforeMount = (monaco: any) => {
+    Object.keys(themes).forEach(themeName => {
+      monaco.editor.defineTheme(themeName, themes[themeName]);
+    });
+  };
 
   const goToNextChapter = () => {
     if (currentChapterIndex < chapters.length - 1) {
@@ -120,15 +135,11 @@ function App() {
       const data = await response.json();
       setOutput(data.output);
       
-      // If it compiled and ran successfully, mark as completed
       if (data.success) {
         if (!completedChapters.includes(currentChapterId)) {
           setCompletedChapters([...completedChapters, currentChapterId]);
         }
       } else {
-        // We set a custom error message to show in the UI, or just let output handle it.
-        // Actually, the error message is already in `data.output` from go test.
-        // So we can just set an error state to indicate it failed if we want, or leave it.
         setError('Verification failed. Check the output tab for details.');
       }
     } catch (err: any) {
@@ -140,7 +151,6 @@ function App() {
 
   return (
     <div className="app-container">
-      {/* Slim Nav (Leftmost) */}
       <nav className="slim-nav">
         <div style={{ height: '56px', borderBottom: '1px solid var(--border-color)', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <GraduationCap color="var(--accent-cyan)" size={28} />
@@ -151,14 +161,17 @@ function App() {
         <div className="slim-nav-icon" title="Dashboard">
           <LayoutDashboard size={20} />
         </div>
-        <div className="slim-nav-icon" style={{ marginTop: 'auto', marginBottom: '16px' }} title="Settings">
+        <div 
+          className="slim-nav-icon" 
+          style={{ marginTop: 'auto', marginBottom: '16px' }} 
+          title="Settings"
+          onClick={() => setIsSettingsOpen(true)}
+        >
           <Settings size={20} />
         </div>
       </nav>
 
-      {/* Main Right Area */}
       <div className="main-wrapper">
-        {/* Top Header */}
         <header className="top-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)' }}>
             <strong style={{ color: 'var(--text-primary)', letterSpacing: '0.5px' }}>Golang Tutorials</strong>
@@ -173,7 +186,6 @@ function App() {
               <span style={{ color: 'var(--text-secondary)' }}>
                 {completedChapters.length}/{chapters.length} complete
               </span>
-              {/* Circular Progress Placeholder */}
               <div style={{ 
                 width: '32px', height: '32px', borderRadius: '50%', 
                 background: `conic-gradient(var(--accent-cyan) ${progress}%, var(--border-color) 0)`,
@@ -197,7 +209,6 @@ function App() {
           </div>
         </header>
 
-        {/* Workspace Area */}
         <div className="workspace-flex">
           <Sidebar 
             chapters={chapters} 
@@ -207,7 +218,6 @@ function App() {
             progress={progress}
           />
           
-          {/* Lesson Content Panel */}
           <section className="lesson-panel">
             <header className="panel-tab">
               <BookOpen size={16} color="var(--text-muted)" />
@@ -234,7 +244,6 @@ function App() {
             </div>
           </section>
           
-          {/* Editor & Terminal Panel */}
           <section className="editor-terminal-panel">
             <div className="editor-container">
               <header className="panel-tab">
@@ -242,7 +251,13 @@ function App() {
                 main.go
                 <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--accent-warning)', marginLeft: '8px' }}></div>
               </header>
-              <CodeEditor code={code} onChange={(v) => setCode(v || '')} />
+              <CodeEditor 
+                code={code} 
+                onChange={(v) => setCode(v || '')} 
+                theme={editorTheme}
+                fontSize={editorFontSize}
+                beforeMount={handleEditorBeforeMount}
+              />
             </div>
 
             <div className="resizer-horizontal" onMouseDown={startResizing} />
@@ -253,7 +268,6 @@ function App() {
                   <TerminalSquare size={16} color="var(--accent-cyan)" />
                   TERMINAL
                 </div>
-                {/* Status Badge */}
                 {output && !error && (
                   <div style={{ background: 'rgba(16, 185, 129, 0.15)', color: 'var(--accent-cyan)', padding: '2px 8px', borderRadius: '12px', fontSize: '0.7rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
                     ✓ PASS
@@ -272,6 +286,14 @@ function App() {
           </section>
         </div>
       </div>
+      <SettingsModal 
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        currentTheme={editorTheme}
+        currentFontSize={editorFontSize}
+        onThemeChange={setEditorTheme}
+        onFontSizeChange={setEditorFontSize}
+      />
     </div>
   );
 }

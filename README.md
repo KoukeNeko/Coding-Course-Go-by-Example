@@ -129,8 +129,17 @@ EOF
 | [go.dev](https://go.dev/)（Tour of Go、Effective Go、Go Spec、Go Blog、pkg.go.dev） | BSD-3-Clause |
 | [Go by Example](https://gobyexample.com/)（Mark McGranaghan） | CC BY 3.0 |
 
+| [Go by Example](https://gobyexample.com/)（Mark McGranaghan） | CC BY 3.0 |
+
 引用片段時皆以自有語句改寫；範例皆原創或顯著變形。
+
+### 主題與樣式
+
+本專案的程式碼編輯器使用了 **GitHub Dark** 與 **GitHub Light** 主題：
+- 這些主題衍生自 GitHub 官方開源的 [primer/github-vscode-theme](https://github.com/primer/github-vscode-theme) (MIT License)。
+- 並由 [brijeshb42/monaco-themes](https://github.com/brijeshb42/monaco-themes) (MIT License) 協助轉換為相容於 Monaco Editor 的格式。
 
 ## 致謝
 
 教材引用之公開授權資源，原作者皆為 Go 團隊與社群貢獻者；參考連結與授權標註保留於每篇 `lesson.md`。
+同時感謝 GitHub Primer 團隊以及開源社群提供的編輯器主題配色。
