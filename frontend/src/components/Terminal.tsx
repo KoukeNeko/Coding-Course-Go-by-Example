@@ -24,19 +24,19 @@ export const Terminal: React.FC<TerminalProps> = ({ output, isExecuting, error }
             <Loader2 size={16} className="animate-spin" style={{ animation: 'spin 1s linear infinite' }} />
             <span style={{ opacity: 0.7 }}>$ go run main.go</span>
           </div>
-        ) : error ? (
+        ) : (output || error) ? (
           <div className="animate-fade-in">
             <div style={{ color: 'var(--text-muted)', marginBottom: '8px' }}>$ go run main.go</div>
-            <div style={{ color: 'var(--accent-error)', display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-              <span>{error}</span>
-            </div>
-          </div>
-        ) : output ? (
-          <div className="animate-fade-in">
-            <div style={{ color: 'var(--text-muted)', marginBottom: '8px' }}>$ go run main.go</div>
-            <div style={{ color: 'var(--text-primary)' }}>
-              {output}
-            </div>
+            {output && (
+              <div style={{ color: 'var(--text-primary)', marginBottom: error ? '16px' : '0' }}>
+                {output}
+              </div>
+            )}
+            {error && (
+              <div style={{ color: 'var(--accent-error)', display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                <span>{error}</span>
+              </div>
+            )}
           </div>
         ) : (
           <div style={{ color: 'var(--text-muted)' }}>$ waiting for execution...</div>
