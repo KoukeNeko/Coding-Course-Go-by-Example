@@ -142,7 +142,7 @@ function App() {
     <div className="app-container">
       {/* Slim Nav (Leftmost) */}
       <nav className="slim-nav">
-        <div style={{ paddingBottom: '24px', borderBottom: '1px solid var(--border-color)', width: '100%', display: 'flex', justifyContent: 'center' }}>
+        <div style={{ height: '56px', borderBottom: '1px solid var(--border-color)', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <GraduationCap color="var(--accent-cyan)" size={28} />
         </div>
         <div className="slim-nav-icon active" title="Course">
