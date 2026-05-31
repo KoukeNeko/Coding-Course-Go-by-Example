@@ -52,7 +52,7 @@ func main() {
 ## 最佳實踐
 
 - ✅ **不確定時用指標 receiver**，但同一個型別的所有方法 receiver 風格要一致。
-- ✅ **小型不可變值（int、string、time.Time）用值傳遞**；大型結構或要修改的對象用指標。
+- ✅ **小型不可變值（int、string、time.Time）用值傳遞**；大型結構或要修改的變數用指標。
 - ✅ 不要把 `*string`、`*int` 當作「可選參數」用；更乾淨的做法是用 zero value、選項函式或多回傳值。
 
 ## 任務
