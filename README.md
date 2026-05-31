@@ -1,3 +1,6 @@
+<img width="2672" height="1465" alt="image" src="https://github.com/user-attachments/assets/494ba26e-ade6-4c78-ad07-22a24c22f830" />
+
+
 # Interactive Go Course
 
 一個資料驅動的互動式 Go 教學平台：左側 lesson、右側可編輯的 `main.go`，按 Run 即在 Docker 沙箱內執行並用隱藏單元測試自動評分。
