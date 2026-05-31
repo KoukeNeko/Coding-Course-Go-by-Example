@@ -46,6 +46,7 @@ func main() {
 // setupRoutes configures the HTTP endpoints.
 func setupRoutes() {
 	http.HandleFunc("/api/execute", handleExecute)
+	http.HandleFunc("/api/chapters", handleGetChapters)
 }
 
 // handleExecute is the HTTP handler for code execution.
@@ -201,4 +202,87 @@ func executeCodeInSandbox(directoryPath string) (output string, err error, isTim
 	combinedOutput := stdoutBuffer.String() + stderrBuffer.String()
 
 	return combinedOutput, executionErr, false
+}
+
+type Chapter struct {
+	ID          string `json:"id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	InitialCode string `json:"initialCode"`
+}
+
+func handleGetChapters(w http.ResponseWriter, r *http.Request) {
+	// Enable CORS for frontend integration
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	coursesDir := "./courses"
+	entries, err := os.ReadDir(coursesDir)
+	if err != nil {
+		log.Printf("Error reading courses directory: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	var chapters []Chapter
+
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+
+		chapterPath := filepath.Join(coursesDir, entry.Name())
+		
+		// Read meta.json
+		metaData, err := os.ReadFile(filepath.Join(chapterPath, "meta.json"))
+		if err != nil {
+			log.Printf("Skipping %s: missing meta.json", entry.Name())
+			continue
+		}
+		var meta struct {
+			ID    string `json:"id"`
+			Title string `json:"title"`
+		}
+		if err := json.Unmarshal(metaData, &meta); err != nil {
+			log.Printf("Skipping %s: invalid meta.json", entry.Name())
+			continue
+		}
+
+		// Read lesson.md
+		lessonData, err := os.ReadFile(filepath.Join(chapterPath, "lesson.md"))
+		if err != nil {
+			log.Printf("Skipping %s: missing lesson.md", entry.Name())
+			continue
+		}
+
+		// Read main.go
+		codeData, err := os.ReadFile(filepath.Join(chapterPath, "main.go"))
+		if err != nil {
+			log.Printf("Skipping %s: missing main.go", entry.Name())
+			continue
+		}
+
+		chapters = append(chapters, Chapter{
+			ID:          meta.ID,
+			Title:       meta.Title,
+			Description: string(lessonData),
+			InitialCode: string(codeData),
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(chapters); err != nil {
+		log.Printf("Error encoding chapters response: %v", err)
+	}
 }

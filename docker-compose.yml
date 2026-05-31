@@ -13,6 +13,8 @@ services:
       # the Docker daemon resolves `/tmp/go-exec-123` on the *host*.
       # Therefore, the backend must write to a directory that maps exactly to the host.
       - /tmp:/tmp
+      # Mount courses directory
+      - ./courses:/app/courses:ro
     environment:
       - PORT=8080
 

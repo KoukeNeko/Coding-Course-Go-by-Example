@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-import { Terminal as TermIcon, AlertCircle, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 interface TerminalProps {
   output: string;
@@ -17,31 +17,29 @@ export const Terminal: React.FC<TerminalProps> = ({ output, isExecuting, error }
   }, [output, isExecuting, error]);
 
   return (
-    <div className="terminal-panel">
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', color: 'var(--text-muted)' }}>
-        <TermIcon size={16} />
-        <span style={{ fontSize: '0.875rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-          Terminal Output
-        </span>
-      </div>
-      
-      <div ref={terminalRef} style={{ overflowY: 'auto', maxHeight: 'calc(100% - 32px)', whiteSpace: 'pre-wrap', fontFamily: 'monospace', fontSize: '0.9rem' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div ref={terminalRef} style={{ overflowY: 'auto', flex: 1, whiteSpace: 'pre-wrap', fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>
         {isExecuting ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--go-light)' }} className="animate-fade-in">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-cyan)' }} className="animate-fade-in">
             <Loader2 size={16} className="animate-spin" style={{ animation: 'spin 1s linear infinite' }} />
-            Executing safely in Docker sandbox...
+            <span style={{ opacity: 0.7 }}>$ go run main.go</span>
           </div>
         ) : error ? (
-          <div style={{ color: 'var(--accent-error)', display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-            <AlertCircle size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
-            <span>{error}</span>
+          <div className="animate-fade-in">
+            <div style={{ color: 'var(--text-muted)', marginBottom: '8px' }}>$ go run main.go</div>
+            <div style={{ color: 'var(--accent-error)', display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+              <span>{error}</span>
+            </div>
           </div>
         ) : output ? (
-          <div className="animate-fade-in" style={{ paddingLeft: '8px', borderLeft: '2px solid var(--go-light)' }}>
-            {output}
+          <div className="animate-fade-in">
+            <div style={{ color: 'var(--text-muted)', marginBottom: '8px' }}>$ go run main.go</div>
+            <div style={{ color: 'var(--text-primary)' }}>
+              {output}
+            </div>
           </div>
         ) : (
-          <span style={{ color: 'var(--text-muted)' }}>Waiting for execution...</span>
+          <div style={{ color: 'var(--text-muted)' }}>$ waiting for execution...</div>
         )}
       </div>
 
